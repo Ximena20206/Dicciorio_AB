@@ -11,13 +11,12 @@
 
 typedef unsigned char booleano;
 
-typedef struct elemento
-{	
-	int n;
+typedef struct elemento{	
+	char p[101];
+	char d[251];
 } elemento;
 
-typedef struct nodo
-{
+typedef struct nodo{
 	struct nodo *izq;
 	struct nodo *der;
 	elemento e;

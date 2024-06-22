@@ -19,89 +19,13 @@ OBSERVACIONES:
 
 */
 
-#include "tablashash.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "DiccionarioAB.h"
 
-// Constantes para las funciones de hash
-const double PHI = 1.618033988749895;    // Razón áurea
-const double SQRT2 = 1.414213562373095;  // Raíz cuadrada de 2
-const double E = 2.718281828459045;      // Número euler
-
-/*
-void crear_tabla(TablaHash *tabla);
-Descripción: Inicializa una tabla hash creando y inicializando cada lista en el arreglo.
-Recibe: TablaHash *tabla (Referencia a la tabla hash a inicializar)
-Devuelve: void
-Observaciones: La tabla hash debe estar previamente declarada.
-*/
-void crear_tabla(TablaHash *tabla) {
-    tabla->tamano = TAMANO_TABLA_HASH;
-    for (int i = 0; i < tabla->tamano; i++) {
-        Initialize(&(tabla->arreglo[i]));
-    }
-}
-
-/*
-int textoAint(const char *clave);
-Descripción: Convierte una cadena de caracteres (clave) en un entero utilizando un método de hashing simple.
-Recibe: const char *clave (Cadena de caracteres a convertir en entero)
-Devuelve: int (Valor entero resultante de la conversión)
-Observaciones: Utiliza una combinación de multiplicación y acumulación sobre los valores ASCII de la clave.
-*/
-int textoAint(const char *clave) {
-    unsigned long hash = 0;
-    while (*clave) {
-        hash = hash * 31 + *clave++;
-    }
-    return (int)hash;
-}
-
-/*
-int funcion_hash1(int clave);
-Descripción: Aplica una función de hash utilizando la razón áurea para distribuir claves en la tabla.
-Recibe: int clave (Valor entero a hashear)
-Devuelve: int (Índice calculado dentro del tamaño de la tabla hash)
-Observaciones: Utiliza la constante PHI como factor de ajuste para distribuir uniformemente las claves.
-*/
-int funcion_hash1(int clave) {
-    double A = PHI; // Razón áurea 
-    double valor = clave * A;
-    double parte_fraccionaria = valor - floor(valor);
-    int hash1 = (int)(TAMANO_TABLA_HASH * parte_fraccionaria);
-    return hash1 % TAMANO_TABLA_HASH;
-}
-
-
-/*
-int funcion_hash2(int clave);
-Descripción: Aplica una función de hash utilizando el número de Euler y la función seno para distribuir claves en la tabla.
-Recibe: int clave (Valor entero a hashear)
-Devuelve: int (Índice calculado dentro del tamaño de la tabla hash)
-Observaciones: Utiliza la constante E y la función trigonométrica seno para distribuir las claves de manera diferente a la función hash1.
-*/
-int funcion_hash2(int clave) {
-    double A = E;
-    double valor = clave * A;
-    double parte_fraccionaria = valor - floor(valor);
-    int hash1 = (int)(TAMANO_TABLA_HASH * parte_fraccionaria);
-    return (hash1 + (int)(sin(parte_fraccionaria) * 10000)) % TAMANO_TABLA_HASH;
-}
-
-
-/*
-void insertar(TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar);
-Descripción: Inserta una palabra y su definición en la tabla hash utilizando una función de hash especificada.
-Recibe: TablaHash *tabla (Referencia a la tabla hash donde se insertará), 
-        const char *palabra (Palabra a insertar), 
-        const char *definicion (Definición correspondiente a la palabra), 
-        int hashAutilizar (Número de función de hash a utilizar)
-Devuelve: void
-Observaciones: Se selecciona una función de hash según el parámetro hashAutilizar y se resuelven colisiones usando Linear Probing.
-*/
 void insertar(TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
     int clave = textoAint(palabra);
     int hash;
@@ -150,16 +74,6 @@ void insertar(TablaHash *tabla, const char *palabra, const char *definicion, int
 
 
 
-/*
-void insertarArchivo(TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar);
-Descripción: Inserta una palabra y su definición en la tabla hash desde un archivo, sin imprimir excesivos mensajes.
-Recibe: TablaHash *tabla (Referencia a la tabla hash donde se insertará), 
-        const char *palabra (Palabra a insertar), 
-        const char *definicion (Definición correspondiente a la palabra), 
-        int hashAutilizar (Número de función de hash a utilizar)
-Devuelve: void
-Observaciones: Se utiliza para cargar grandes cantidades de palabras sin mostrar mensajes de inserción para cada una.
-*/
 void insertarArchivo(TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
     int clave = textoAint(palabra);
     int hash = 0;
@@ -199,17 +113,6 @@ void insertarArchivo(TablaHash *tabla, const char *palabra, const char *definici
 }
 
 
-
-
-/*
-char* buscar(TablaHash *tabla, const char *palabra, int hashAutilizar);
-Descripción: Busca una palabra en la tabla hash utilizando una función de hash especificada.
-Recibe: TablaHash *tabla (Referencia a la tabla hash donde se buscará la palabra), 
-        const char *palabra (Palabra a buscar), 
-        int hashAutilizar (Número de función de hash a utilizar)
-Devuelve: char* (Copia de la definición encontrada de la palabra buscada)
-Observaciones: Si la palabra no se encuentra, muestra un mensaje de error y devuelve NULL.
-*/
 char* buscar(TablaHash *tabla, const char *palabra, int hashAutilizar) {
     int clave = textoAint(palabra);
     int hash;
@@ -252,13 +155,6 @@ char* buscar(TablaHash *tabla, const char *palabra, int hashAutilizar) {
 }
 
 
-/*
-Función para eliminar una palabra y su definición de la tabla hash.
-Recibe: TablaHash *tabla (Referencia a la tabla hash donde se buscará la palabra),
-        const char *palabra (Palabra a eliminar),
-        int hashAutilizar (Número de función de hash a utilizar)
-No devuelve nada. Elimina la palabra si se encuentra en la tabla hash.
-*/
 void eliminar(TablaHash *tabla, const char *palabra, int hashAutilizar) {
     int clave = textoAint(palabra);
     int hash;
@@ -299,65 +195,6 @@ void eliminar(TablaHash *tabla, const char *palabra, int hashAutilizar) {
     printf("\nEliminar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
 }
 
-
-/*
-Función para modificar la definición de una palabra existente en la tabla hash.
-Recibe: TablaHash *tabla (Referencia a la tabla hash donde se buscará la palabra),
-        const char *palabra (Palabra cuya definición se desea modificar),
-        const char *nueva_definicion (Nueva definición para la palabra),
-        int hashAutilizar (Número de función de hash a utilizar)
-No devuelve nada. Modifica la definición si la palabra se encuentra en la tabla hash.
-*/
-void modificar(TablaHash *tabla, const char *palabra, const char *nueva_definicion, int hashAutilizar) {
-    int clave = textoAint(palabra);
-    int hash;
-
-    // Seleccionar la función de hash a utilizar
-    if (hashAutilizar == 1) {
-        hash = funcion_hash1(clave);
-    } else if (hashAutilizar == 2) {
-        hash = funcion_hash2(clave);
-    } else {
-        printf("Error: Función de hash no válida.\n");
-        return;
-    }
-
-    int indice = hash % tabla->tamano;
-    int colisiones = 0;
-    int saltos = 0; // Contador de saltos realizados
-
-    while (!Empty(&tabla->arreglo[indice])) {
-        elemento e;
-        posicion pos = First(&tabla->arreglo[indice]);
-        while (ValidatePosition(&tabla->arreglo[indice], pos)) {
-            e = Position(&tabla->arreglo[indice], pos);
-            if (strcmp(e.palabra, palabra) == 0) {
-                // Encontrado: modificar la definición
-                strncpy(e.definicion, nueva_definicion, 500);
-                Replace(&tabla->arreglo[indice], pos, e); // Actualizar el elemento modificado
-
-                // Mostrar estadísticas de la modificación
-                    printf("Modificar: Palabra '%s' modificada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-                return;
-            }
-            saltos++;
-            pos = Following(&tabla->arreglo[indice], pos);
-        }
-        colisiones++;
-        saltos++;
-        indice = (indice + 1) % tabla->tamano; // Linear probing para manejar colisiones
-    }
-
-    // Mostrar estadísticas (no encontrada)
-    printf("Modificar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-}
-
-
-/*
-Función para liberar la memoria ocupada por una tabla hash y sus elementos.
-Recibe: TablaHash *tabla (Referencia a la tabla hash que se desea liberar)
-No devuelve nada. Libera la memoria asignada a la tabla hash y sus elementos.
-*/
 void liberar_tabla(TablaHash *tabla) {
     for (int i = 0; i < tabla->tamano; ++i) {
         Destroy(&tabla->arreglo[i]);
@@ -365,14 +202,6 @@ void liberar_tabla(TablaHash *tabla) {
     free(tabla);
 }
 
-
-/*
-Función para cargar un archivo de definiciones en la tabla hash.
-Recibe: TablaHash *tabla (Referencia a la tabla hash donde se cargarán las definiciones),
-        const char *nombre_archivo (Nombre del archivo de definiciones a cargar),
-        int hashAutilizar (Número de función de hash a utilizar)
-No devuelve nada. Carga las definiciones desde el archivo en la tabla hash.
-*/
 void cargar_archivo(TablaHash *tabla, const char *nombre_archivo, int hashAutilizar) {
     FILE *archivo = fopen(nombre_archivo, "r");
     if (!archivo) {
@@ -411,11 +240,6 @@ void cargar_archivo(TablaHash *tabla, const char *nombre_archivo, int hashAutili
     fclose(archivo);
 }
 
-/*
-Función para consultar las estadísticas de la tabla hash.
-Recibe: TablaHash *tabla (Referencia a la tabla hash de la cual se consultarán las estadísticas)
-No devuelve nada. Imprime por consola las estadísticas.
-*/
 void consultar_estadisticas(TablaHash *tabla) {
     int num_palabras = 0;
     int num_colisiones = 0;
@@ -462,7 +286,6 @@ void consultar_estadisticas(TablaHash *tabla) {
         if (pasos_max > orden_max_busqueda) {
             orden_max_busqueda = pasos_max;
         }
-;
     }
 
     // Imprimir estadísticas finales
@@ -477,36 +300,47 @@ void consultar_estadisticas(TablaHash *tabla) {
     printf("\n***************************************************\n");
 }
 
-//Función que muestra nuestro menú de opciones 
-void mostrar_menu(){
-    printf("\nMenu:\n");
-    printf("1. Cargar un archivo de definiciones\n");
-    printf("2. Agregar una palabra y su definicion\n");
-    printf("3. Modificar la definicion de una palabra\n");
-    printf("4. Eliminar una palabra\n");
-    printf("5. Buscar una palabra\n");
-    printf("6. Ver estadisticas de la tabla hash\n");
-    printf("7. Salir\n");
-    printf("Ingrese el numero de la opcion que desea ejecutar: ");
-}
+void modificar(TablaHash *tabla, const char *palabra, const char *nueva_definicion, int hashAutilizar) {
+    int clave = textoAint(palabra);
+    int hash;
 
-// Función para seleccionar la función de hash a utilizar
-int seleccionar_funcion_hash(){
-    int opcion;
-    do {
-        printf("\nSeleccione la funcion de hash que desea utilizar:\n");
-        printf("1. Funcion de hash 1 (Hecha con la razón aurea):\n");
-        printf("2. Funcion de hash 2 (Hecha con el numero Euler y la funcion trigonometrica Seno): \n");
-        printf("Ingrese el numero de la opcion que desea utilizar: ");
-        scanf("%d", &opcion);
-        getchar(); // Capturar el salto de línea después de la opción
-        if (opcion != 1 && opcion != 2) {
-            printf("Opcion no valida. Por favor, ingrese 1 o 2.\n");
+    // Seleccionar la función de hash a utilizar
+    if (hashAutilizar == 1) {
+        hash = funcion_hash1(clave);
+    } else if (hashAutilizar == 2) {
+        hash = funcion_hash2(clave);
+    } else {
+        printf("Error: Función de hash no válida.\n");
+        return;
+    }
+
+    int indice = hash % tabla->tamano;
+    int colisiones = 0;
+    int saltos = 0; // Contador de saltos realizados
+
+    while (!Empty(&tabla->arreglo[indice])) {
+        elemento e;
+        posicion pos = First(&tabla->arreglo[indice]);
+        while (ValidatePosition(&tabla->arreglo[indice], pos)) {
+            e = Position(&tabla->arreglo[indice], pos);
+            if (strcmp(e.palabra, palabra) == 0) {
+                // Encontrado: modificar la definición
+                strncpy(e.definicion, nueva_definicion, 500);
+                Replace(&tabla->arreglo[indice], pos, e); // Actualizar el elemento modificado
+
+                // Mostrar estadísticas de la modificación
+                    printf("Modificar: Palabra '%s' modificada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
+                return;
+            }
+            saltos++;
+            pos = Following(&tabla->arreglo[indice], pos);
         }
-    } while (opcion != 1 && opcion != 2);
-    return opcion;
+        colisiones++;
+        saltos++;
+        indice = (indice + 1) % tabla->tamano; // Linear probing para manejar colisiones
+    }
+
+    // Mostrar estadísticas (no encontrada)
+    printf("Modificar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
 }
-
-
-
 
