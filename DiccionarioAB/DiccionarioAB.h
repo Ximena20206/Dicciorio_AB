@@ -26,11 +26,11 @@ OBSERVACIONES:
 
 // Funciones para manejar el diccionario de acuerdo con la estructura del arbol binario
 
-void CargarArchivo(arbol *A, const char *nombre_archivo);
+void CargarArchivo(arbol *A, const char *nombre_archivo);// falta poner la altura final despues de la carga
 
 void AgregarPalabra(arbol *A, const char *palabra, const char *definicion);
 
-void ModificarDefinicion(arbol *A, const char *palabra, const char *nueva_definicion, int hashAutilizar*/);
+void ModificarDefinicion(arbol *A, const char *palabra, const char *nueva_definicion);
 
 void EliminarPalabra(arbol *A, const char *palabra);
 
@@ -38,8 +38,5 @@ char* BuscarPalabra(arbol *A, const char *palabra);
 
 void ConsultarEstadisticas(arbol *A);
 
-//FUNCIONES AUXILIARES DE ESTA SECCION
-
-void insertarArchivo(arbol *A, const char *palabra, const char *definicion);
 
 #endif // DiccionarioAB_H

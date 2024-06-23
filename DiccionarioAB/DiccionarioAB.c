@@ -46,61 +46,62 @@ void CargarArchivo(arbol *A, const char *nombre_archivo) {
             definicion[len] = '\0'; // Terminación de la cadena
 
             //Insertar en el arbol
-            insertarArchivo(A, token_palabra, definicion);
+            AgregarPalabra(A, token_palabra, definicion);
         }
     }
 
     fclose(archivo);
 }
 
-void AgregarPalabra(TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
-    
+void AgregarPalabra(arbol *A, const char *palabra, const char *definicion) {
 
-    // Verificar si la palabra ya existe en la lista
-    posicion pos = First(&tabla->arreglo[indice]);
-    while (ValidatePosition(&tabla->arreglo[indice], pos)) {
-        elemento e = Position(&tabla->arreglo[indice], pos);
-        if (strcmp(e.palabra, palabra) == 0) {
-            // Ya existe la misma palabra en la tabla
-            if (strcmp(e.definicion, definicion) == 0) {
-                printf("La definición para la palabra '%s' ya existe en la tabla.\n", palabra);
-            } else {
-                printf("La palabra '%s' ya existe en la tabla con una definición diferente.\n", palabra);
-            }
-            return;
-        }
-        colisiones++;
-        pos = Following(&tabla->arreglo[indice], pos);
-    }
-
-    // Insertar en la lista en el índice correspondiente
     elemento e;
+    posicion p;
+
+    //llenamos los datos de la nueva palbra
     strncpy(e.palabra, palabra, sizeof(e.palabra) - 1);
     e.palabra[sizeof(e.palabra) - 1] = '\0'; // Asegurarse de que la palabra está terminada en NULL
     strncpy(e.definicion, definicion, sizeof(e.definicion) - 1);
     e.definicion[sizeof(e.definicion) - 1] = '\0'; // Asegurarse de que la definición está terminada en NULL
-    Add(&tabla->arreglo[indice], e);
 
-    // Mostrar estadísticas
-    printf("Insertar: Palabra '%s', Hash: %d, Colisiones: %d\n", palabra, hash, colisiones);
-}*/)
+    //Comenzamos la insercion del archivo
 
-void ModificarDefinicion(/*TablaHash *tabla, const char *palabra, const char *nueva_definicion, int hashAutilizar) {
-    int clave = textoAint(palabra);
-    int hash;
+    if(Empty(A))//Si no hay palabras, insertar la primera palabra en la raiz
+        NewRightSon(A, Root(A), e);  
+    else{
+        
+        p=Root(A);
+        
+        while(1){//buscar el lugar de las palabras correspondientes
+            
+            if(strcasecmp(e.palabra, p->palabra) == 0)//si la palabra ya se encuentra en el diccionario
+                printf("\nLa palabra %s ya existe", e.palabra);
+            else{ 
+                if(strcmp(e.palabra, p->palabra) <= 0){//la nueva palabra es menor que la actual
+                    if(LeftSon(A, p)==NULL){// si no tiene hijo izquierdo, se coloca en ese espacio
+                        NewLeftSon(A, p, e);
+                        break;
+                    }//Si tiene hijo izquierdo, vamos a el para evaluar los tamanos de las palabras registradas con la nueva
+                    else
+                        p=LeftSon(A, p);
+                }
+                else{
+                    if(RightSon(A, p)==NULL){
+                        NewRightSon(A, p, e);
+                        break;
+                    }
+                    else
+                        p=RightSon(A, p);
+                }
+            }
+        }
+        
 
-    // Seleccionar la función de hash a utilizar
-    if (hashAutilizar == 1) {
-        hash = funcion_hash1(clave);
-    } else if (hashAutilizar == 2) {
-        hash = funcion_hash2(clave);
-    } else {
-        printf("Error: Función de hash no válida.\n");
-        return;
     }
+}
 
-    int indice = hash % tabla->tamano;
-    int colisiones = 0;
+void ModificarDefinicion(arbol *A, const char *palabra, const char *nueva_definicion) {
+
     int saltos = 0; // Contador de saltos realizados
 
     while (!Empty(&tabla->arreglo[indice])) {
@@ -127,7 +128,7 @@ void ModificarDefinicion(/*TablaHash *tabla, const char *palabra, const char *nu
 
     // Mostrar estadísticas (no encontrada)
     printf("Modificar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-}*/)
+}
 
 void EliminarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar) {
     int clave = textoAint(palabra);
@@ -169,29 +170,16 @@ void EliminarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar)
     printf("\nEliminar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
 }*/)
 
-char* BuscarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar) {
-    int clave = textoAint(palabra);
-    int hash;
-    int colisiones = 0;
-    // Seleccionar la función de hash a utilizar
-    if (hashAutilizar == 1) {
-        hash = funcion_hash1(clave);
-    } else if (hashAutilizar == 2) {
-        hash = funcion_hash2(clave);
-    } else {
-        printf("\nError: Función de hash no válida.\n");
-        return NULL;
-    }
-
-    int indice = hash % tabla->tamano;
-    int saltos = 0; // Contador de saltos realizados (En que lugar se encuentra de la lista)
-
-    while (!Empty(&tabla->arreglo[indice])) {
+char* BuscarPalabra(arbol *A, const char *palabra) {
+    
+    int saltos = 0; // Contador de saltos realizados
+    posicion p=Root(A);
+    while (1) {
         elemento e;
         posicion pos = First(&tabla->arreglo[indice]);
         while (ValidatePosition(&tabla->arreglo[indice], pos)) {
             e = Position(&tabla->arreglo[indice], pos);
-            if (strcmp(e.palabra, palabra) == 0) {
+            if (strcasecmp(e.palabra, palabra) == 0) {
                 // Mostrar estadísticas
                     printf("\nBuscar: Palabra '%s' encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
                 // Devolver una copia de definicion
@@ -208,7 +196,7 @@ char* BuscarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar) 
     // Mostrar estadísticas (no encontrada)
     printf("Buscar: Palabra '%s' no encontrada, Hash: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
     return NULL;
-}*/)
+}
 
 void ConsultarEstadisticas(TablaHash *tabla) {
     int num_palabras = 0;
@@ -269,51 +257,3 @@ void ConsultarEstadisticas(TablaHash *tabla) {
     printf("Tamano de la tabla hash: O(n)");
     printf("\n***************************************************\n");
 }
-
-
-//FUNCIONES AUXILIARES DE ESTA SECCION
-
-void insertarArchivo(arbol *A, const char *palabra, const char *definicion) {
-
-    elemento e;
-    posicion p;
-    int comparacion_tam_palabras;
-
-    //llenamos los datos de la nueva palbra
-    strncpy(e.palabra, palabra, sizeof(e.palabra) - 1);
-    e.palabra[sizeof(e.palabra) - 1] = '\0'; // Asegurarse de que la palabra está terminada en NULL
-    strncpy(e.definicion, definicion, sizeof(e.definicion) - 1);
-    e.definicion[sizeof(e.definicion) - 1] = '\0'; // Asegurarse de que la definición está terminada en NULL
-
-    //Comenzamos la insercion del archivo
-
-    if(Empty(A))//Si no hay palabras, insertar la primera palabra en la raiz
-        NewRightSon(A, Root(A), e);  
-    else{
-        
-        p=Root(A);
-        
-        while(1){//buscar el lugar de las palabras correspondientes
-            comparacion_tam_palabras=strcmp(e.palabra, p->palabra);
-            if(comparacion_tam_palabras <= 0){//la nueva palabra es menor que la actual
-                if(LeftSon(A, p)==NULL){// si no tiene hijo izquierdo, se coloca en ese espacio
-                    NewLeftSon(A, p, e);
-                    break;
-                }//Si tiene hijo izquierdo, vamos a el para evaluar los tamanos de las palabras registradas con la nueva
-                else
-                    p=LeftSon(A, p);
-            }
-            else{
-                if(RightSon(A, p)==NULL){
-                    NewRightSon(A, p, e);
-                    break;
-                }
-                else
-                    p=RightSon(A, p);
-            }
-        }
-        
-
-    }
-}
-

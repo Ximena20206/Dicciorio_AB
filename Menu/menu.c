@@ -28,6 +28,7 @@ int Menu(arbol *A){
             fgets(nombre_archivo, sizeof(nombre_archivo), stdin);
             nombre_archivo[strcspn(nombre_archivo, "\n")] = 0; // Eliminar el salto de línea al final
             CargarArchivo(A, nombre_archivo);
+            //TAMAÑO FINAL DEL ARBOL
             break;
         case 2://   Agregar una palabra y su definicion 
             printf("Ingrese la palabra que desea agregar: ");
@@ -38,7 +39,8 @@ int Menu(arbol *A){
             fgets(definicion, sizeof(definicion), stdin);
             definicion[strcspn(definicion, "\n")] = 0; // Eliminar el salto de línea al final
 
-            AgregarPalabra();//&tabla, palabra, definicion, hashAutilizar);
+            AgregarPalabra(A, palabra, definicion);
+            //TAMAÑO FINAL DEL ARBOL
             break;
         case 3://   Modificar definicion
             printf("Ingrese la palabra cuya definicion desea modificar: ");
@@ -49,7 +51,7 @@ int Menu(arbol *A){
             fgets(definicion, sizeof(definicion), stdin);
             definicion[strcspn(definicion, "\n")] = 0; // Eliminar el salto de línea al final
 
-            ModificarDefinicion();//&tabla, palabra, definicion, hashAutilizar);
+            ModificarDefinicion(A, palabra, definicion);
             break;
         case 4://   Eliminar palabra
             printf("Ingrese la palabra que desea eliminar: ");
@@ -63,7 +65,7 @@ int Menu(arbol *A){
             fgets(palabra, sizeof(palabra), stdin);
             palabra[strcspn(palabra, "\n")] = 0; // Eliminar el salto de línea al final
 
-            char *definicion_encontrada = BuscarPalabra();//&tabla, palabra, hashAutilizar);
+            char *definicion_encontrada = BuscarPalabra(A, palabra);
             if (definicion_encontrada != NULL) {
                 printf("Definicion de '%s': %s\n", palabra, definicion_encontrada);
                 free(definicion_encontrada); // Liberar la memoria asignada por strdup en buscar
