@@ -21,7 +21,7 @@ void MostrarMenu(int *op){
 
 int Menu(arbol *A){
     int opcion = MostrarMenu(&opcion);
-    
+    char nombre_archivo[500];
     switch (opcion) {
         case 1://   Cargar un archivo
             printf("Ingrese el nombre del archivo a cargar (debe estar en el mismo directorio): ");

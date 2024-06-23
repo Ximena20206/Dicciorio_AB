@@ -9,7 +9,7 @@
 #include "..\TAD_AB\TADArbolBin.h"
 #include "..\Recorridos\Recorridos.h"
 
-void CargarArchivo(arbol A, const char *nombre_archivo) {
+void CargarArchivo(arbol *A, const char *nombre_archivo) {
     FILE *archivo = fopen(nombre_archivo, "r");
     if (!archivo) {
         fprintf(stderr, "Error al abrir el archivo.\n");
@@ -24,45 +24,37 @@ void CargarArchivo(arbol A, const char *nombre_archivo) {
         if (!token_palabra) continue; // Si no hay ':' en la línea, saltar a la siguiente
 
         // Con isspace quitamos los espacios si llegaran a haber del inicio y el final del token para quitar espacios al inicio y final
-        while (isspace((unsigned char)*token_palabra)) token_palabra++;
+        while (isspace((unsigned char)*token_palabra))
+            token_palabra++;
         size_t len = strlen(token_palabra);
-        while (len > 0 && isspace((unsigned char)token_palabra[len - 1])) len--;
+        while (len > 0 && isspace((unsigned char)token_palabra[len - 1]))
+            len--;
         token_palabra[len] = '\0'; // Terminación de la cadena
 
         // Ahora token_palabra contiene la palabra o palabras antes del ':'
+        
+        
         // Buscar definición después del ':'
         char *definicion = strtok(NULL, "."); //Así lo detenenmos
         if (definicion) {
             // Trim de la definición para quitar espacios al inicio y final
-            while (isspace((unsigned char)*definicion)) definicion++;
+            while (isspace((unsigned char)*definicion))
+                definicion++;
             len = strlen(definicion);
-            while (len > 0 && isspace((unsigned char)definicion[len - 1])) len--;
+            while (len > 0 && isspace((unsigned char)definicion[len - 1]))
+                len--;
             definicion[len] = '\0'; // Terminación de la cadena
 
-            // Insertar en la tabla hash
-            insertarArchivo(tabla, token_palabra, definicion, hashAutilizar);
+            //Insertar en el arbol
+            insertarArchivo(A, token_palabra, definicion);
         }
     }
 
     fclose(archivo);
 }
 
-void AgregarPalabra(/*TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
-    int clave = textoAint(palabra);
-    int hash;
-
-    // Seleccionar la función de hash a utilizar
-    if (hashAutilizar == 1) {
-        hash = funcion_hash1(clave);
-    } else if (hashAutilizar == 2) {
-        hash = funcion_hash2(clave);
-    } else {
-        printf("\nError: Función de hash no válida.\n");
-        return;
-    }
-
-    int indice = hash % tabla->tamano;
-    int colisiones = 0;
+void AgregarPalabra(TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
+    
 
     // Verificar si la palabra ya existe en la lista
     posicion pos = First(&tabla->arreglo[indice]);
@@ -218,7 +210,7 @@ char* BuscarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar) 
     return NULL;
 }*/)
 
-void ConsultarEstadisticas(/*TablaHash *tabla) {
+void ConsultarEstadisticas(TablaHash *tabla) {
     int num_palabras = 0;
     int num_colisiones = 0;
     int num_listas_vacias = 0;
@@ -276,46 +268,52 @@ void ConsultarEstadisticas(/*TablaHash *tabla) {
     printf("Orden maximo de busqueda: %d\n", orden_max_busqueda);
     printf("Tamano de la tabla hash: O(n)");
     printf("\n***************************************************\n");
-}*/)
+}
 
 
+//FUNCIONES AUXILIARES DE ESTA SECCION
 
+void insertarArchivo(arbol *A, const char *palabra, const char *definicion) {
 
-void insertarArchivo(/*TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
-    int clave = textoAint(palabra);
-    int hash = 0;
-
-    // Seleccionar la función de hash a utilizar
-    if (hashAutilizar == 1) {
-        hash = funcion_hash1(clave);
-    } else if (hashAutilizar == 2) {
-        hash = funcion_hash2(clave);
-    } else {
-        printf("\nError: Función de hash no válida.\n");
-        return;
-    }
-
-    int indice = hash % tabla->tamano;
-    int colisiones = 0;
-
-    // Insertar en la tabla hash sin resolver colisiones
     elemento e;
+    posicion p;
+    int comparacion_tam_palabras;
+
+    //llenamos los datos de la nueva palbra
     strncpy(e.palabra, palabra, sizeof(e.palabra) - 1);
     e.palabra[sizeof(e.palabra) - 1] = '\0'; // Asegurarse de que la palabra está terminada en NULL
     strncpy(e.definicion, definicion, sizeof(e.definicion) - 1);
     e.definicion[sizeof(e.definicion) - 1] = '\0'; // Asegurarse de que la definición está terminada en NULL
 
-    // Insertar el elemento en el índice calculado
-    Add(&tabla->arreglo[indice], e);
+    //Comenzamos la insercion del archivo
 
-    // Contar las colisiones sin resolverlas
-    while (!Empty(&tabla->arreglo[indice])) {
-        colisiones++;
-        indice = (indice + 1) % tabla->tamano; // Avanzar al siguiente índice sin resolver colisiones
+    if(Empty(A))//Si no hay palabras, insertar la primera palabra en la raiz
+        NewRightSon(A, Root(A), e);  
+    else{
+        
+        p=Root(A);
+        
+        while(1){//buscar el lugar de las palabras correspondientes
+            comparacion_tam_palabras=strcmp(e.palabra, p->palabra);
+            if(comparacion_tam_palabras <= 0){//la nueva palabra es menor que la actual
+                if(LeftSon(A, p)==NULL){// si no tiene hijo izquierdo, se coloca en ese espacio
+                    NewLeftSon(A, p, e);
+                    break;
+                }//Si tiene hijo izquierdo, vamos a el para evaluar los tamanos de las palabras registradas con la nueva
+                else
+                    p=LeftSon(A, p);
+            }
+            else{
+                if(RightSon(A, p)==NULL){
+                    NewRightSon(A, p, e);
+                    break;
+                }
+                else
+                    p=RightSon(A, p);
+            }
+        }
+        
+
     }
-
-
-    // Incrementar el contador de colisiones
-    colisiones++;
-}*/)
+}
 
