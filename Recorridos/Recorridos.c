@@ -4,9 +4,11 @@
     Practica 5 Implementacion de Arboles Binarios
     Compilacion: gcc -o Recorridos.c -o re.o
 */
-#include "Recorridos.h"
-#include "TAD_AB/TADArbolBin.h"
+
 #include <stdio.h>
+#include "Recorridos.h"
+#include "../TAD_AB/TADArbolBin.h"
+
 
 // Recorrido PreOrden
 void PreOrden(posicion P) {

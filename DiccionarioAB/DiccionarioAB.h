@@ -23,30 +23,22 @@ OBSERVACIONES:
 //Librerias a utilizar:
 #ifndef DiccionarioAB_H
 #define DiccionarioAB_H
-#include "..\TAD_AB\TADArbolBin.h"
-#include "..\Recorridos.h"
-
 
 // Funciones para manejar el diccionario de acuerdo con la estructura del arbol binario
 
-void CargarArchivo(TablaHash *tabla, const char *nombre_archivo, int hashAutilizar);
+void CargarArchivo(arbol *a, const char *nombre_archivo, int hashAutilizar*/);
 
-void AgregarPalabra(arbol *A, );
+void AgregarPalabra(/*TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar*/);
 
-char* BuscarPalabra(TablaHash *tabla, const char *palabra, int hashAutilizar);
+void ModificarDefinicion(/*TablaHash *tabla, const char *palabra, const char *nueva_definicion, int hashAutilizar*/);
 
-void ModificarDefinicion(TablaHash *tabla, const char *palabra, const char *nueva_definicion, int hashAutilizar);
+void EliminarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar*/);
 
-void EliminarPalabra(TablaHash *tabla, const char *palabra, int hashAutilizar);
+char* BuscarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar*/);
 
-void consultar_estadisticas(TablaHash *tabla);
-
-//void insertarArchivo(TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar);
-
-//void liberar_tabla(TablaHash *tabla);
-
-//void mostrar_menu();
+void ConsultarEstadisticas(/*TablaHash *tabla*/);
 
 
+void insertarArchivo(/*TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar*/);
 
 #endif // DiccionarioAB_H

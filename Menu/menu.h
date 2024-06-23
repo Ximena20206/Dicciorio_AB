@@ -5,4 +5,4 @@ void MostrarMenu(int *op):
 
 int Menu();
 
-#endif
+#endif//Menu_h

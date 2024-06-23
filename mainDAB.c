@@ -8,7 +8,7 @@ int main(){
     Initialize(&A);
 
     while(ans!=10)
-        ans=Menu();
+        ans=Menu(&A);
 
     Destroy(&A);
 

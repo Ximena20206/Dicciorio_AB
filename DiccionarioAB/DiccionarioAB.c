@@ -1,23 +1,4 @@
-/*
-AUTORES:
-    - Rocha Arellano Ximena Yulian
-    - Bautista Romero Demian
 
-(C) Junio 2024
-VERSIÓN: 1.0
-
-DESCRIPCIÓN:
-    Este archivo contiene la implementación de las funciones declaradas en tablashash.h.
-    Define las operaciones necesarias para crear, manipular y gestionar una tabla hash
-    que almacena pares de palabras y definiciones utilizando dos funciones de hash diferentes.
-
-OBSERVACIONES:
-    - Las funciones de hash utilizadas son funcion_hash1 y funcion_hash2, cada una diseñada
-      para generar un índice único a partir de una clave entera.
-    - Este archivo debe ser compilado junto con tablashash.h, TADListaDL.c y cualquier otro
-      archivo de código fuente que contenga el programa principal o pruebas.
-
-*/
 
 #include <math.h>
 #include <stdio.h>
@@ -25,8 +6,48 @@ OBSERVACIONES:
 #include <string.h>
 #include <ctype.h>
 #include "DiccionarioAB.h"
+#include "..\TAD_AB\TADArbolBin.h"
+#include "..\Recorridos\Recorridos.h"
 
-void insertar(TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
+void CargarArchivo(arbol A, const char *nombre_archivo) {
+    FILE *archivo = fopen(nombre_archivo, "r");
+    if (!archivo) {
+        fprintf(stderr, "Error al abrir el archivo.\n");
+        return;
+    }
+
+    char linea[512]; // Asumimos que ninguna línea del archivo superará los 512 caracteres
+
+    while (fgets(linea, sizeof(linea), archivo)) {
+        // Buscar el primer ':' que separa las palabras de la definición
+        char *token_palabra = strtok(linea, ":");
+        if (!token_palabra) continue; // Si no hay ':' en la línea, saltar a la siguiente
+
+        // Con isspace quitamos los espacios si llegaran a haber del inicio y el final del token para quitar espacios al inicio y final
+        while (isspace((unsigned char)*token_palabra)) token_palabra++;
+        size_t len = strlen(token_palabra);
+        while (len > 0 && isspace((unsigned char)token_palabra[len - 1])) len--;
+        token_palabra[len] = '\0'; // Terminación de la cadena
+
+        // Ahora token_palabra contiene la palabra o palabras antes del ':'
+        // Buscar definición después del ':'
+        char *definicion = strtok(NULL, "."); //Así lo detenenmos
+        if (definicion) {
+            // Trim de la definición para quitar espacios al inicio y final
+            while (isspace((unsigned char)*definicion)) definicion++;
+            len = strlen(definicion);
+            while (len > 0 && isspace((unsigned char)definicion[len - 1])) len--;
+            definicion[len] = '\0'; // Terminación de la cadena
+
+            // Insertar en la tabla hash
+            insertarArchivo(tabla, token_palabra, definicion, hashAutilizar);
+        }
+    }
+
+    fclose(archivo);
+}
+
+void AgregarPalabra(/*TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
     int clave = textoAint(palabra);
     int hash;
 
@@ -70,13 +91,55 @@ void insertar(TablaHash *tabla, const char *palabra, const char *definicion, int
 
     // Mostrar estadísticas
     printf("Insertar: Palabra '%s', Hash: %d, Colisiones: %d\n", palabra, hash, colisiones);
-}
+}*/)
 
-
-
-void insertarArchivo(TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
+void ModificarDefinicion(/*TablaHash *tabla, const char *palabra, const char *nueva_definicion, int hashAutilizar) {
     int clave = textoAint(palabra);
-    int hash = 0;
+    int hash;
+
+    // Seleccionar la función de hash a utilizar
+    if (hashAutilizar == 1) {
+        hash = funcion_hash1(clave);
+    } else if (hashAutilizar == 2) {
+        hash = funcion_hash2(clave);
+    } else {
+        printf("Error: Función de hash no válida.\n");
+        return;
+    }
+
+    int indice = hash % tabla->tamano;
+    int colisiones = 0;
+    int saltos = 0; // Contador de saltos realizados
+
+    while (!Empty(&tabla->arreglo[indice])) {
+        elemento e;
+        posicion pos = First(&tabla->arreglo[indice]);
+        while (ValidatePosition(&tabla->arreglo[indice], pos)) {
+            e = Position(&tabla->arreglo[indice], pos);
+            if (strcmp(e.palabra, palabra) == 0) {
+                // Encontrado: modificar la definición
+                strncpy(e.definicion, nueva_definicion, 500);
+                Replace(&tabla->arreglo[indice], pos, e); // Actualizar el elemento modificado
+
+                // Mostrar estadísticas de la modificación
+                    printf("Modificar: Palabra '%s' modificada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
+                return;
+            }
+            saltos++;
+            pos = Following(&tabla->arreglo[indice], pos);
+        }
+        colisiones++;
+        saltos++;
+        indice = (indice + 1) % tabla->tamano; // Linear probing para manejar colisiones
+    }
+
+    // Mostrar estadísticas (no encontrada)
+    printf("Modificar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
+}*/)
+
+void EliminarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar) {
+    int clave = textoAint(palabra);
+    int hash;
 
     // Seleccionar la función de hash a utilizar
     if (hashAutilizar == 1) {
@@ -90,30 +153,31 @@ void insertarArchivo(TablaHash *tabla, const char *palabra, const char *definici
 
     int indice = hash % tabla->tamano;
     int colisiones = 0;
+    int saltos = 0; // Contador de saltos realizados
 
-    // Insertar en la tabla hash sin resolver colisiones
-    elemento e;
-    strncpy(e.palabra, palabra, sizeof(e.palabra) - 1);
-    e.palabra[sizeof(e.palabra) - 1] = '\0'; // Asegurarse de que la palabra está terminada en NULL
-    strncpy(e.definicion, definicion, sizeof(e.definicion) - 1);
-    e.definicion[sizeof(e.definicion) - 1] = '\0'; // Asegurarse de que la definición está terminada en NULL
-
-    // Insertar el elemento en el índice calculado
-    Add(&tabla->arreglo[indice], e);
-
-    // Contar las colisiones sin resolverlas
     while (!Empty(&tabla->arreglo[indice])) {
+        posicion pos = First(&tabla->arreglo[indice]);
+        while (ValidatePosition(&tabla->arreglo[indice], pos)) {
+            elemento e = Position(&tabla->arreglo[indice], pos);
+            if (strcmp(e.palabra, palabra) == 0) {
+                Remove(&tabla->arreglo[indice], pos);
+                // Mostrar estadísticas
+                    printf("\nEliminar: Palabra '%s' eliminada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
+                return;
+            }
+            saltos++;
+            pos = Following(&tabla->arreglo[indice], pos);
+        }
         colisiones++;
-        indice = (indice + 1) % tabla->tamano; // Avanzar al siguiente índice sin resolver colisiones
+        saltos++;
+        indice = (indice + 1) % tabla->tamano; // Linear probing para manejar colisiones
     }
 
+    // Mostrar estadísticas (no encontrada)
+    printf("\nEliminar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
+}*/)
 
-    // Incrementar el contador de colisiones
-    colisiones++;
-}
-
-
-char* buscar(TablaHash *tabla, const char *palabra, int hashAutilizar) {
+char* BuscarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar) {
     int clave = textoAint(palabra);
     int hash;
     int colisiones = 0;
@@ -152,95 +216,9 @@ char* buscar(TablaHash *tabla, const char *palabra, int hashAutilizar) {
     // Mostrar estadísticas (no encontrada)
     printf("Buscar: Palabra '%s' no encontrada, Hash: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
     return NULL;
-}
+}*/)
 
-
-void eliminar(TablaHash *tabla, const char *palabra, int hashAutilizar) {
-    int clave = textoAint(palabra);
-    int hash;
-
-    // Seleccionar la función de hash a utilizar
-    if (hashAutilizar == 1) {
-        hash = funcion_hash1(clave);
-    } else if (hashAutilizar == 2) {
-        hash = funcion_hash2(clave);
-    } else {
-        printf("\nError: Función de hash no válida.\n");
-        return;
-    }
-
-    int indice = hash % tabla->tamano;
-    int colisiones = 0;
-    int saltos = 0; // Contador de saltos realizados
-
-    while (!Empty(&tabla->arreglo[indice])) {
-        posicion pos = First(&tabla->arreglo[indice]);
-        while (ValidatePosition(&tabla->arreglo[indice], pos)) {
-            elemento e = Position(&tabla->arreglo[indice], pos);
-            if (strcmp(e.palabra, palabra) == 0) {
-                Remove(&tabla->arreglo[indice], pos);
-                // Mostrar estadísticas
-                    printf("\nEliminar: Palabra '%s' eliminada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-                return;
-            }
-            saltos++;
-            pos = Following(&tabla->arreglo[indice], pos);
-        }
-        colisiones++;
-        saltos++;
-        indice = (indice + 1) % tabla->tamano; // Linear probing para manejar colisiones
-    }
-
-    // Mostrar estadísticas (no encontrada)
-    printf("\nEliminar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-}
-
-void liberar_tabla(TablaHash *tabla) {
-    for (int i = 0; i < tabla->tamano; ++i) {
-        Destroy(&tabla->arreglo[i]);
-    }
-    free(tabla);
-}
-
-void cargar_archivo(TablaHash *tabla, const char *nombre_archivo, int hashAutilizar) {
-    FILE *archivo = fopen(nombre_archivo, "r");
-    if (!archivo) {
-        fprintf(stderr, "Error al abrir el archivo.\n");
-        return;
-    }
-
-    char linea[512]; // Asumimos que ninguna línea del archivo superará los 512 caracteres
-
-    while (fgets(linea, sizeof(linea), archivo)) {
-        // Buscar el primer ':' que separa las palabras de la definición
-        char *token_palabra = strtok(linea, ":");
-        if (!token_palabra) continue; // Si no hay ':' en la línea, saltar a la siguiente
-
-        // Con isspace quitamos los espacios si llegaran a haber del inicio y el final del token para quitar espacios al inicio y final
-        while (isspace((unsigned char)*token_palabra)) token_palabra++;
-        size_t len = strlen(token_palabra);
-        while (len > 0 && isspace((unsigned char)token_palabra[len - 1])) len--;
-        token_palabra[len] = '\0'; // Terminación de la cadena
-
-        // Ahora token_palabra contiene la palabra o palabras antes del ':'
-        // Buscar definición después del ':'
-        char *definicion = strtok(NULL, "."); //Así lo detenenmos
-        if (definicion) {
-            // Trim de la definición para quitar espacios al inicio y final
-            while (isspace((unsigned char)*definicion)) definicion++;
-            len = strlen(definicion);
-            while (len > 0 && isspace((unsigned char)definicion[len - 1])) len--;
-            definicion[len] = '\0'; // Terminación de la cadena
-
-            // Insertar en la tabla hash
-            insertarArchivo(tabla, token_palabra, definicion, hashAutilizar);
-        }
-    }
-
-    fclose(archivo);
-}
-
-void consultar_estadisticas(TablaHash *tabla) {
+void ConsultarEstadisticas(/*TablaHash *tabla) {
     int num_palabras = 0;
     int num_colisiones = 0;
     int num_listas_vacias = 0;
@@ -298,11 +276,14 @@ void consultar_estadisticas(TablaHash *tabla) {
     printf("Orden maximo de busqueda: %d\n", orden_max_busqueda);
     printf("Tamano de la tabla hash: O(n)");
     printf("\n***************************************************\n");
-}
+}*/)
 
-void modificar(TablaHash *tabla, const char *palabra, const char *nueva_definicion, int hashAutilizar) {
+
+
+
+void insertarArchivo(/*TablaHash *tabla, const char *palabra, const char *definicion, int hashAutilizar) {
     int clave = textoAint(palabra);
-    int hash;
+    int hash = 0;
 
     // Seleccionar la función de hash a utilizar
     if (hashAutilizar == 1) {
@@ -310,37 +291,31 @@ void modificar(TablaHash *tabla, const char *palabra, const char *nueva_definici
     } else if (hashAutilizar == 2) {
         hash = funcion_hash2(clave);
     } else {
-        printf("Error: Función de hash no válida.\n");
+        printf("\nError: Función de hash no válida.\n");
         return;
     }
 
     int indice = hash % tabla->tamano;
     int colisiones = 0;
-    int saltos = 0; // Contador de saltos realizados
 
+    // Insertar en la tabla hash sin resolver colisiones
+    elemento e;
+    strncpy(e.palabra, palabra, sizeof(e.palabra) - 1);
+    e.palabra[sizeof(e.palabra) - 1] = '\0'; // Asegurarse de que la palabra está terminada en NULL
+    strncpy(e.definicion, definicion, sizeof(e.definicion) - 1);
+    e.definicion[sizeof(e.definicion) - 1] = '\0'; // Asegurarse de que la definición está terminada en NULL
+
+    // Insertar el elemento en el índice calculado
+    Add(&tabla->arreglo[indice], e);
+
+    // Contar las colisiones sin resolverlas
     while (!Empty(&tabla->arreglo[indice])) {
-        elemento e;
-        posicion pos = First(&tabla->arreglo[indice]);
-        while (ValidatePosition(&tabla->arreglo[indice], pos)) {
-            e = Position(&tabla->arreglo[indice], pos);
-            if (strcmp(e.palabra, palabra) == 0) {
-                // Encontrado: modificar la definición
-                strncpy(e.definicion, nueva_definicion, 500);
-                Replace(&tabla->arreglo[indice], pos, e); // Actualizar el elemento modificado
-
-                // Mostrar estadísticas de la modificación
-                    printf("Modificar: Palabra '%s' modificada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-                return;
-            }
-            saltos++;
-            pos = Following(&tabla->arreglo[indice], pos);
-        }
         colisiones++;
-        saltos++;
-        indice = (indice + 1) % tabla->tamano; // Linear probing para manejar colisiones
+        indice = (indice + 1) % tabla->tamano; // Avanzar al siguiente índice sin resolver colisiones
     }
 
-    // Mostrar estadísticas (no encontrada)
-    printf("Modificar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-}
+
+    // Incrementar el contador de colisiones
+    colisiones++;
+}*/)
 
