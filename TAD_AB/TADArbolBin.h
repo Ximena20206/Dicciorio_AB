@@ -148,6 +148,12 @@ Efecto: Recibe un árbol binario *A, una posición P y un elemento E, se remplaz
 Requerimientos: El árbol binario *A es no vacío y la posición P es una posición valida. */
 void ReplaceNode(arbol *A,posicion P, elemento E);
 
+/* Altura (Height): recibe<-árbol(*A), posición (P); retorna -> int
+Altura(*A, P)
+Efecto: Recibe un árbol binario *A y una posición P, devuelve la altura del subárbol que tiene a P como raíz.
+Requerimientos: El árbol binario *A es no vacío y la posición P es una posición valida.
+*/
+int Altura(arbol *A, posicion p);
 
 int ContarNodos(arbol *A, posicion p);
 

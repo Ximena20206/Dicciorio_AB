@@ -113,6 +113,7 @@ void ModificarDefinicion(arbol *A, const char *palabra, const char *nueva_defini
             fgets(defaux, sizeof(defaux), stdin);
             strncpy(p->e.palabra, defaux, 251);
             printf("\nSaltos realizados: %d", saltos);
+            return;
         }
         if (comp_tam_cad < 0) {
             p = LeftSon(A, p);
@@ -121,7 +122,6 @@ void ModificarDefinicion(arbol *A, const char *palabra, const char *nueva_defini
         }
         saltos++;
     }
-
     printf("\nModificar: Palabra '%s' no encontrada, Saltos: %d", palabra, saltos);
 }
 
@@ -164,6 +164,7 @@ void EliminarPalabra(arbol *A, const char *palabra) {
             }
             free(p);
             printf("\nPalabra ""%s"" eliminada con exito. Saltos: %d", palabra, saltos);
+            return;
         }
         if (comp_tam_cad < 0) {
             p = LeftSon(A, p);
@@ -203,19 +204,15 @@ char* BuscarPalabra(arbol *A, const char *palabra) {
 
 void ConsultarEstadisticas(arbol *A) {
     int num_palabras = ContarNodos(A, Root(A));
-    int tamano_max_lista = 0;
+    int altura = Altura(A, Root(A));
     int orden_max_busqueda = 0;
 
     // Imprimir estadísticas finales
     printf("\n***************************************************\n");
     printf("Estadisticas:\n");
     printf("Numero total de palabras: %d\n", num_palabras);
-    printf("Tamano maximo de una lista: %d\n", tamano_max_lista);
+    printf("Tamano maximo de una lista: %d\n", altura);
     printf("Orden maximo de busqueda: %d\n", orden_max_busqueda);
     printf("Tamano de la tabla hash: O(n)");
     printf("\n***************************************************\n");
 }
-
-
-//Funciones auxiliares
-

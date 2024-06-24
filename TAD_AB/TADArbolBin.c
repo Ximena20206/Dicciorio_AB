@@ -363,8 +363,27 @@ void ReplaceNode(arbol *A,posicion P, elemento E){
     P->e = E;
 }
 
+/* Altura (Height): recibe<-árbol(*A), posición (P); retorna -> int
+Altura(*A, P)
+Efecto: Recibe un árbol binario *A y una posición P, devuelve la altura del subárbol que tiene a P como raíz.
+Requerimientos: El árbol binario *A es no vacío y la posición P es una posición valida.
+*/
+int Altura(arbol *A, posicion p) {
+    if (NullNode(A, p)) 
+        return 0;
+    
+    int altura_izq = Altura(A, LeftSon(A, p));
+    int altura_der = Altura(A, RightSon(A, p));
+
+    if (altura_der > altura_izq)
+        return altura_der + 1;
+    else
+        return altura_izq + 1; 
+}
+
 int ContarNodos(arbol *A, posicion p){
     if(NullNode(A, p))
         return 0;
     else    return(1+ ContarNodos(A, RightSon(A, p)) +  ContarNodos(A, LeftSon(A, p)));
 }
+

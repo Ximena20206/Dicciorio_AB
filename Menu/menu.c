@@ -17,7 +17,7 @@ void MostrarMenu(int *op){
     printf("6. Recorrido PreOrden\n");
     printf("7. Recorrido InOrden\n");
     printf("8. Recorrido PosOrden\n");
-    printf("9. Consultar Estadísticas\n");
+    printf("9. Consultar Estadisticas\n");
     printf("11. Salir\n");
     printf("Ingrese el numero de la opcion que desea ejecutar: ");
     scanf("%d", op);
@@ -34,6 +34,7 @@ int Menu(arbol *A){
             nombre_archivo[strcspn(nombre_archivo, "\n")] = 0; // Eliminar el salto de línea al final
             CargarArchivo(A, nombre_archivo);
             //TAMAÑO FINAL DEL ARBOL
+            printf("\nLa altura del arbol despues de la operacion es de: %d", Altura(A, Root(A)));
             break;
         case 2://   Agregar una palabra y su definicion 
             printf("Ingrese la palabra que desea agregar: ");
@@ -46,6 +47,7 @@ int Menu(arbol *A){
 
             AgregarPalabra(A, palabra, definicion);
             //TAMAÑO FINAL DEL ARBOL
+            printf("\nLa altura del arbol despues de la operacion es de: %d", Altura(A, Root(A)));
             break;
         case 3://   Modificar definicion
             printf("Ingrese la palabra cuya definicion desea modificar: ");
