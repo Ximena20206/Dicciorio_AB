@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include "DiccionarioAB.h"
 #include "..\TAD_AB\TADArbolBin.h"
-#include "..\Recorridos\Recorridos.h"
+//#include "..\Recorridos\Recorridos.h"
 
 void CargarArchivo(arbol *A, const char *nombre_archivo) {
     FILE *archivo = fopen(nombre_archivo, "r");
@@ -64,7 +64,6 @@ void AgregarPalabra(arbol *A, const char *palabra, const char *definicion) {
     strncpy(e.definicion, definicion, sizeof(e.definicion) - 1);
     e.definicion[sizeof(e.definicion) - 1] = '\0'; // Asegurarse de que la definición está terminada en NULL
 
-    //Comenzamos la insercion del archivo
 
     if(Empty(A))//Si no hay palabras, insertar la primera palabra en la raiz
         NewRightSon(A, Root(A), e);  
@@ -74,10 +73,10 @@ void AgregarPalabra(arbol *A, const char *palabra, const char *definicion) {
         
         while(1){//buscar el lugar de las palabras correspondientes
             
-            if(strcasecmp(e.palabra, p->palabra) == 0)//si la palabra ya se encuentra en el diccionario
+            if(strcasecmp(e.palabra, p->e.palabra) == 0)//si la palabra ya se encuentra en el diccionario
                 printf("\nLa palabra %s ya existe", e.palabra);
             else{ 
-                if(strcmp(e.palabra, p->palabra) <= 0){//la nueva palabra es menor que la actual
+                if(strcmp(e.palabra, p->e.palabra) <= 0){//la nueva palabra es menor que la actual
                     if(LeftSon(A, p)==NULL){// si no tiene hijo izquierdo, se coloca en ese espacio
                         NewLeftSon(A, p, e);
                         break;
@@ -103,157 +102,120 @@ void AgregarPalabra(arbol *A, const char *palabra, const char *definicion) {
 void ModificarDefinicion(arbol *A, const char *palabra, const char *nueva_definicion) {
 
     int saltos = 0; // Contador de saltos realizados
+    int  comp_tam_cad;
+    char defaux[251];
+    posicion p= Root(A);
+    while (p != NULL) {
+        comp_tam_cad= strcasecmp(palabra, p->e.palabra);
+        if (comp_tam_cad == 0 ) {
 
-    while (!Empty(&tabla->arreglo[indice])) {
-        elemento e;
-        posicion pos = First(&tabla->arreglo[indice]);
-        while (ValidatePosition(&tabla->arreglo[indice], pos)) {
-            e = Position(&tabla->arreglo[indice], pos);
-            if (strcmp(e.palabra, palabra) == 0) {
-                // Encontrado: modificar la definición
-                strncpy(e.definicion, nueva_definicion, 500);
-                Replace(&tabla->arreglo[indice], pos, e); // Actualizar el elemento modificado
-
-                // Mostrar estadísticas de la modificación
-                    printf("Modificar: Palabra '%s' modificada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-                return;
-            }
-            saltos++;
-            pos = Following(&tabla->arreglo[indice], pos);
+            printf("\nIngresa nueva definicion para %s: ", palabra);
+            fgets(defaux, sizeof(defaux), stdin);
+            strncpy(p->e.palabra, defaux, 251);
+            printf("\nSaltos realizados: %d", saltos);
         }
-        colisiones++;
+        if (comp_tam_cad < 0) {
+            p = LeftSon(A, p);
+        } else {
+            p = RightSon(A, p);
+        }
         saltos++;
-        indice = (indice + 1) % tabla->tamano; // Linear probing para manejar colisiones
     }
 
-    // Mostrar estadísticas (no encontrada)
-    printf("Modificar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
+    printf("\nModificar: Palabra '%s' no encontrada, Saltos: %d", palabra, saltos);
 }
 
-void EliminarPalabra(/*TablaHash *tabla, const char *palabra, int hashAutilizar) {
-    int clave = textoAint(palabra);
-    int hash;
-
-    // Seleccionar la función de hash a utilizar
-    if (hashAutilizar == 1) {
-        hash = funcion_hash1(clave);
-    } else if (hashAutilizar == 2) {
-        hash = funcion_hash2(clave);
-    } else {
-        printf("\nError: Función de hash no válida.\n");
-        return;
-    }
-
-    int indice = hash % tabla->tamano;
-    int colisiones = 0;
+void EliminarPalabra(arbol *A, const char *palabra) {
     int saltos = 0; // Contador de saltos realizados
+    int comp_tam_cad;
+    posicion p= Root(A);
+    posicion aux;
+    posicion padre, padreaux;
+    while (p != NULL) {
+        comp_tam_cad= strcasecmp(palabra, p->e.palabra);
+        if (comp_tam_cad == 0 ) {
+            padre=Parent(A, p);
 
-    while (!Empty(&tabla->arreglo[indice])) {
-        posicion pos = First(&tabla->arreglo[indice]);
-        while (ValidatePosition(&tabla->arreglo[indice], pos)) {
-            elemento e = Position(&tabla->arreglo[indice], pos);
-            if (strcmp(e.palabra, palabra) == 0) {
-                Remove(&tabla->arreglo[indice], pos);
-                // Mostrar estadísticas
-                    printf("\nEliminar: Palabra '%s' eliminada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-                return;
+            if(padre!=NULL){//Si la palabra se encontro en un nodo distinto a la raiz
+                
+                if(p->der== NULL && p->izq==NULL){//si el nodo a eliminar es una hoja
+                    (p == padre->der)? (padre->der = NULL): (padre->izq = NULL);//se actualiza el apuntador del padre a nulo
+                }
+                else if(p->der!=NULL && p->izq!= NULL){//si el nodo a eliminar tiene dos hijos aplicamos el mas a la izquierda del de la derecha
+                    aux=p->der;//vamos a la derecha de p
+                    while(aux->izq != NULL){//a continuacion, vamos al hijo mas a la izquierda de aux
+                        aux=LeftSon(A, aux);    
+                    }
+                    aux->izq=p->izq;// lo que estaba a la izquierda de p lo ponemos a la izquierda de aux
+                    (p==padre->der)? (padre->der = aux) : (padre->izq = aux);// enlazamos aux con padre de p 
+                    padreaux = Parent(A, aux);//necesitamos actualizar al padre de aux 
+
+                    //como estamos seguros que viajamos lo mas izquierda posible, solo queda saber si la derecha de aux
+                    // tiene algo, si es así, se lo ponemos al padre. De lo contrario, lo puntamos a Nulo
+                    (aux->der!=NULL)? (padreaux->der = aux->der): (padreaux->izq = NULL);
+                    //desenlazamos p
+                    p->izq=NULL;
+                    p->der=NULL;
+                }
+                else{//si el nodo a eliminar tiene un solo hijo
+                    aux= (p->der!=NULL)? p->der: p->izq;//ver cual de los dos hijos de p es el no vacio
+                    (p==padre->der)? (padre->der = aux) : (padre->izq = aux);// enlazamos el hijo de p con su padre
+                }
             }
-            saltos++;
-            pos = Following(&tabla->arreglo[indice], pos);
+            free(p);
+            printf("\nPalabra ""%s"" eliminada con exito. Saltos: %d", palabra, saltos);
         }
-        colisiones++;
+        if (comp_tam_cad < 0) {
+            p = LeftSon(A, p);
+        } else {
+            p = RightSon(A, p);
+        }
         saltos++;
-        indice = (indice + 1) % tabla->tamano; // Linear probing para manejar colisiones
     }
 
-    // Mostrar estadísticas (no encontrada)
-    printf("\nEliminar: Palabra '%s' no encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-}*/)
+    printf("\nEliminar: Palabra '%s' no encontrada, Saltos: %d", palabra, saltos);
+}
 
 char* BuscarPalabra(arbol *A, const char *palabra) {
     
     int saltos = 0; // Contador de saltos realizados
-    posicion p=Root(A);
-    while (1) {
-        elemento e;
-        posicion pos = First(&tabla->arreglo[indice]);
-        while (ValidatePosition(&tabla->arreglo[indice], pos)) {
-            e = Position(&tabla->arreglo[indice], pos);
-            if (strcasecmp(e.palabra, palabra) == 0) {
-                // Mostrar estadísticas
-                    printf("\nBuscar: Palabra '%s' encontrada, Hash: %d, Colisiones: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
-                // Devolver una copia de definicion
-                char *definicion_copia = strdup(e.definicion); //strdup copia el contenido de la cadena original en la nueva área de memoria asignada
-                return definicion_copia;
-            }
-            saltos++;
-            pos = Following(&tabla->arreglo[indice], pos);
+    int comp_tam_cad;
+    posicion p= Root(A);
+    while (p != NULL) {
+        comp_tam_cad= strcasecmp(palabra, p->e.palabra);
+        if (comp_tam_cad == 0 ) {
+            char *definicion_copia = strdup(p->e.definicion);
+            printf("\nSaltos realizados: %d", saltos);
+            return definicion_copia;
+        }
+        if (comp_tam_cad < 0) {
+            p = LeftSon(A, p);
+        } else {
+            p = RightSon(A, p);
         }
         saltos++;
-        indice = (indice + 1) % tabla->tamano; // Linear probing para encontrar la siguiente posición
     }
 
-    // Mostrar estadísticas (no encontrada)
-    printf("Buscar: Palabra '%s' no encontrada, Hash: %d, Saltos: %d\n", palabra, indice, colisiones, saltos);
+    printf("\nBuscar: Palabra '%s' no encontrada, Saltos: %d", palabra, saltos);
     return NULL;
+    
 }
 
-void ConsultarEstadisticas(TablaHash *tabla) {
-    int num_palabras = 0;
-    int num_colisiones = 0;
-    int num_listas_vacias = 0;
+void ConsultarEstadisticas(arbol *A) {
+    int num_palabras = ContarNodos(A, Root(A));
     int tamano_max_lista = 0;
     int orden_max_busqueda = 0;
-
-    // Recorre cada índice de la tabla hash
-    for (int i = 0; i < tabla->tamano; ++i) {
-        // Obtener el tamaño de la lista actual
-        int tamano_lista = Size(&tabla->arreglo[i]);
-
-        // Contabilizar el número total de palabras
-        num_palabras += tamano_lista;
-
-        // Actualizar el tamaño máximo de lista
-        if (tamano_lista > tamano_max_lista) {
-            tamano_max_lista = tamano_lista;
-        }
-
-        // Contabilizar listas vacías
-        if (tamano_lista == 0) {
-            num_listas_vacias++;
-        }
-
-        // Calcular colisiones
-        if (tamano_lista > 1) {
-            num_colisiones += (tamano_lista - 1);
-        }
-
-        // Calcular el orden máximo de búsqueda en cada lista no vacía
-        int pasos_max = 0;
-        if (tamano_lista > 0) {
-            posicion pos = First(&tabla->arreglo[i]);
-
-            // Iterar a través de la lista
-            while (ValidatePosition(&tabla->arreglo[i], pos)) {
-                pasos_max++;
-                pos = Following(&tabla->arreglo[i], pos);
-            }
-        }
-        
-        // Actualizar el orden máximo de búsqueda
-        if (pasos_max > orden_max_busqueda) {
-            orden_max_busqueda = pasos_max;
-        }
-    }
 
     // Imprimir estadísticas finales
     printf("\n***************************************************\n");
     printf("Estadisticas:\n");
     printf("Numero total de palabras: %d\n", num_palabras);
-    printf("Numero total de colisiones: %d\n", num_colisiones);
-    printf("Numero de listas vacias: %d\n", num_listas_vacias);
     printf("Tamano maximo de una lista: %d\n", tamano_max_lista);
     printf("Orden maximo de busqueda: %d\n", orden_max_busqueda);
     printf("Tamano de la tabla hash: O(n)");
     printf("\n***************************************************\n");
 }
+
+
+//Funciones auxiliares
+

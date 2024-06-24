@@ -23,7 +23,7 @@ OBSERVACIONES:
 //Librerias a utilizar:
 #ifndef DiccionarioAB_H
 #define DiccionarioAB_H
-
+#include "..\TAD_AB\TADArbolBin.h"
 // Funciones para manejar el diccionario de acuerdo con la estructura del arbol binario
 
 void CargarArchivo(arbol *A, const char *nombre_archivo);// falta poner la altura final despues de la carga

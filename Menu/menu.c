@@ -1,5 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <Windows.h>
 #include "menu.h"
+#include "../TAD_AB/TADArbolBin.h"
 #include "..\DiccionarioAB\DiccionarioAB.h"
 #include "..\Recorridos\Recorridos.h"
 
@@ -20,8 +24,9 @@ void MostrarMenu(int *op){
 }
 
 int Menu(arbol *A){
-    int opcion = MostrarMenu(&opcion);
-    char nombre_archivo[500];
+    int opcion;
+    MostrarMenu(&opcion);
+    char nombre_archivo[500], palabra[101], definicion[251];
     switch (opcion) {
         case 1://   Cargar un archivo
             printf("Ingrese el nombre del archivo a cargar (debe estar en el mismo directorio): ");
@@ -58,7 +63,7 @@ int Menu(arbol *A){
             fgets(palabra, sizeof(palabra), stdin);
             palabra[strcspn(palabra, "\n")] = 0; // Eliminar el salto de línea al final
 
-            EliminarPalabra();//&tabla, palabra, hashAutilizar);
+            EliminarPalabra(A, palabra);
             break;
         case 5://   Buscar palabra
             printf("Ingrese la palabra que desea buscar: ");
@@ -72,16 +77,16 @@ int Menu(arbol *A){
             }
             break;
         case 6://   Recorriodo Preorden
-
+            PreOrden(Root(A));
             break;
         case 7://   Recorriodo Inorden
-
+            InOrden(Root(A));
             break;
         case 8://   Recorriodo Posorden
-
+            PostOrden(Root(A));
             break;
         case 9://   Consultar Estadisticas
-            ConsultarEstadisticas();//&tabla);
+            ConsultarEstadisticas(A);
             break;
         case 10:
             printf("Saliendo del programa...\n");
@@ -92,6 +97,6 @@ int Menu(arbol *A){
     }
 
     Sleep(3);
-    clear();
+    system("cls");
     return opcion;
 }

@@ -6,6 +6,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "TADArbolBin.h"
 
 
@@ -70,7 +71,7 @@ posicion Parent(arbol *A,posicion P){
                 break;
             }
 
-            if (P->e.n < par->e.n) 
+            if (strcasecmp(P->e.palabra , par->e.palabra) < 0) 
                 par = par->izq;
             else 
                 par = par->der;
@@ -135,7 +136,7 @@ Requerimientos: El árbol binario *A es no vacío y la posición P es una posici
 */
 posicion Search(arbol *A,elemento E){
     posicion ser = *A;
-    int b=0;
+    int b=0, comp_tam_cad;
 
     if(Empty(A)){
         printf("\nERROR: Search. Arbol vacío");
@@ -143,11 +144,12 @@ posicion Search(arbol *A,elemento E){
     }
 
     while (ser != NULL) {
-        if (ser->e.n == E.n) {
+        comp_tam_cad= strcasecmp(E.palabra, ser->e.palabra);
+        if (comp_tam_cad == 0 ) {
             b=1;
             break;
         }
-        if (E.n < ser->e.n) {
+        if (comp_tam_cad < 0) {
             ser = ser->izq;
         } else {
             ser = ser->der;
@@ -359,4 +361,10 @@ void ReplaceNode(arbol *A,posicion P, elemento E){
         exit(1);
     } 
     P->e = E;
+}
+
+int ContarNodos(arbol *A, posicion p){
+    if(NullNode(A, p))
+        return 0;
+    else    return(1+ ContarNodos(A, RightSon(A, p)) +  ContarNodos(A, LeftSon(A, p)));
 }

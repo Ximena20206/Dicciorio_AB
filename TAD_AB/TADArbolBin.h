@@ -148,4 +148,7 @@ Efecto: Recibe un árbol binario *A, una posición P y un elemento E, se remplaz
 Requerimientos: El árbol binario *A es no vacío y la posición P es una posición valida. */
 void ReplaceNode(arbol *A,posicion P, elemento E);
 
+
+int ContarNodos(arbol *A, posicion p);
+
 #endif

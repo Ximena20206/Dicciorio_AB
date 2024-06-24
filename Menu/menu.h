@@ -1,8 +1,10 @@
-#ifdef Menu_h
-#define Menu_h
+#ifndef _menu_h
+#define _menu_h
 
-void MostrarMenu(int *op):
+#include "../TAD_AB/TADArbolBin.h"
 
-int Menu();
+void MostrarMenu(int *op);
 
-#endif//Menu_h
+int Menu(arbol *A);
+
+#endif//_menu_h
