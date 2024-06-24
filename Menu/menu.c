@@ -21,6 +21,7 @@ void MostrarMenu(int *op){
     printf("10. Salir\n");
     printf("Ingrese el numero de la opcion que desea ejecutar: ");
     scanf("%d", op);
+    while (getchar() != '\n');  // Consumir cualquier carácter residual en el buffer de entrada
 }
 
 int Menu(arbol *A){
@@ -97,7 +98,9 @@ int Menu(arbol *A){
             printf("Opcion no valida. Por favor, ingrese una opción valida.\n");
             break;
     }
-
+    printf("\n\nPresiona enter para continuar...");
+    char algo;
+    scanf("%c", &algo);
     Sleep(3);
     system("cls");
     return opcion;

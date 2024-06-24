@@ -38,4 +38,6 @@ char* BuscarPalabra(arbol *A, const char *palabra);
 
 void ConsultarEstadisticas(arbol *A);
 
+char* EncontrarPalabraMasProfunda(arbol *A);
+
 #endif // DiccionarioAB_H

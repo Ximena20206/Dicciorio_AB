@@ -73,8 +73,10 @@ void AgregarPalabra(arbol *A, const char *palabra, const char *definicion) {
         
         while(1){//buscar el lugar de las palabras correspondientes
             
-            if(strcasecmp(e.palabra, p->e.palabra) == 0)//si la palabra ya se encuentra en el diccionario
+            if(strcasecmp(e.palabra, p->e.palabra) == 0){//si la palabra ya se encuentra en el diccionario
                 printf("\nLa palabra %s ya existe", e.palabra);
+                return;
+            }
             else{ 
                 if(strcmp(e.palabra, p->e.palabra) < 0){//la nueva palabra es menor que la actual
                     if(LeftSon(A, p)==NULL){// si no tiene hijo izquierdo, se coloca en ese espacio
@@ -107,11 +109,8 @@ void ModificarDefinicion(arbol *A, const char *palabra, const char *nueva_defini
     posicion p= Root(A);
     while (p != NULL) {
         comp_tam_cad= strcasecmp(palabra, p->e.palabra);
-        if (comp_tam_cad == 0 ) {
-
-            printf("\nIngresa nueva definicion para %s: ", palabra);
-            fgets(defaux, sizeof(defaux), stdin);
-            strncpy(p->e.palabra, defaux, 251);
+        if (comp_tam_cad == 0 ) {            
+            strncpy(p->e.definicion, nueva_definicion, 251);
             printf("\nSaltos realizados: %d", saltos);
             return;
         }
@@ -186,7 +185,7 @@ char* BuscarPalabra(arbol *A, const char *palabra) {
         comp_tam_cad= strcasecmp(palabra, p->e.palabra);
         if (comp_tam_cad == 0 ) {
             char *definicion_copia = strdup(p->e.definicion);
-            printf("\nSaltos realizados: %d", saltos);
+            printf("\nSaltos realizados: %d\n", saltos);
             return definicion_copia;
         }
         if (comp_tam_cad < 0) {
@@ -205,14 +204,40 @@ char* BuscarPalabra(arbol *A, const char *palabra) {
 void ConsultarEstadisticas(arbol *A) {
     int num_palabras = ContarNodos(A, Root(A));
     int altura = Altura(A, Root(A));
-    int orden_max_busqueda = 0;
-
+    char *palabra= EncontrarPalabraMasProfunda(A);
     // Imprimir estadísticas finales
     printf("\n***************************************************\n");
     printf("Estadisticas:\n");
     printf("Numero total de palabras: %d\n", num_palabras);
-    printf("Tamano maximo de una lista: %d\n", altura);
-    printf("Orden maximo de busqueda: %d\n", orden_max_busqueda);
-    printf("Tamano de la tabla hash: O(n)");
+    printf("Tamano del arbol: %d\n", altura);
+    printf("Palabra profunda: %s\n", palabra);
     printf("\n***************************************************\n");
+}
+
+static void EncontrarPalabraMasProfundaAux(posicion p, int nivel_actual, int *nivel_maximo, char *palabra_mas_profunda) {
+    if (p != NULL) {
+        // Procesar el nodo actual
+        if (nivel_actual > *nivel_maximo) {
+            *nivel_maximo = nivel_actual;
+            strncpy(palabra_mas_profunda, p->e.palabra, sizeof(p->e.palabra));
+            palabra_mas_profunda[sizeof(p->e.palabra) - 1] = '\0'; // Terminar la cadena
+        }
+
+        // Llamadas recursivas a los hijos izquierdo y derecho
+        EncontrarPalabraMasProfundaAux(p->izq, nivel_actual + 1, nivel_maximo, palabra_mas_profunda);
+        EncontrarPalabraMasProfundaAux(p->der, nivel_actual + 1, nivel_maximo, palabra_mas_profunda);
+    }
+}
+
+char* EncontrarPalabraMasProfunda(arbol *A) {
+    if (A == NULL || *A == NULL)
+        return NULL;
+
+    int nivel_maximo = -1;
+    char palabra_mas_profunda[sizeof((*A)->e.palabra)] = ""; // Inicializa la palabra más profunda
+
+    // Llamar a la función auxiliar recursiva
+    EncontrarPalabraMasProfundaAux(*A, 0, &nivel_maximo, palabra_mas_profunda);
+
+    return strdup(palabra_mas_profunda); // Devuelve una copia dinámica de la palabra encontrada
 }
