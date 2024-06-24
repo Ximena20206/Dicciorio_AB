@@ -18,7 +18,7 @@ void MostrarMenu(int *op){
     printf("7. Recorrido InOrden\n");
     printf("8. Recorrido PosOrden\n");
     printf("9. Consultar Estadisticas\n");
-    printf("11. Salir\n");
+    printf("10. Salir\n");
     printf("Ingrese el numero de la opcion que desea ejecutar: ");
     scanf("%d", op);
 }

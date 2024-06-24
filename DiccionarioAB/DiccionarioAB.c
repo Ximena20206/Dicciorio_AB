@@ -76,7 +76,7 @@ void AgregarPalabra(arbol *A, const char *palabra, const char *definicion) {
             if(strcasecmp(e.palabra, p->e.palabra) == 0)//si la palabra ya se encuentra en el diccionario
                 printf("\nLa palabra %s ya existe", e.palabra);
             else{ 
-                if(strcmp(e.palabra, p->e.palabra) <= 0){//la nueva palabra es menor que la actual
+                if(strcmp(e.palabra, p->e.palabra) < 0){//la nueva palabra es menor que la actual
                     if(LeftSon(A, p)==NULL){// si no tiene hijo izquierdo, se coloca en ese espacio
                         NewLeftSon(A, p, e);
                         break;
