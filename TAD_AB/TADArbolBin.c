@@ -1,8 +1,15 @@
 /*
-    Alumna: Rocha Arellano Ximena Yulian
-    Profesor: Edgardo Franco Martinez
-    Practica 5 Implementacion de Arboles Binarios
-    Compilacion: gcc -c TADArbolBin.c -o TADAB.o
+
+    AUTORES:
+    - Rocha Arellano Ximena Yulian
+    - Bautista Romero Demian
+
+    (C) Junio 2024
+    VERSIÓN: 1.0
+
+    DESCRIPCIÓN:
+    Este archivo implementa las funciones para un TAD arbol binario
+
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -381,6 +388,9 @@ int Altura(arbol *A, posicion p) {
         return altura_izq + 1; 
 }
 
+/*ContarNodos: recibe<-árbol(*A), posición(posicion p); 
+ContarNodos(*A, p)
+Efecto: Cuenta y devuelve el número total de nodos en el subárbol de *A comenzando desde la posición p.*/
 int ContarNodos(arbol *A, posicion p){
     if(NullNode(A, p))
         return 0;

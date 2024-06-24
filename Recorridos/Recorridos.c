@@ -1,8 +1,16 @@
 /*
-    Alumna: Rocha Arellano Ximena Yulian
-    Profesor: Edgardo Franco Martinez
-    Practica 5 Implementacion de Arboles Binarios
-    Compilacion: gcc -o Recorridos.c -o re.o
+
+AUTORES:
+    - Rocha Arellano Ximena Yulian
+    - Bautista Romero Demian
+
+(C) Junio 2024
+VERSIÓN: 1.0
+
+DESCRIPCIÓN:
+    Este archivo implementa funciones necesarias para recorrer de una forma especifica
+    los arboles binarios 
+
 */
 
 #include <stdio.h>
